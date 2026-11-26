@@ -1,11 +1,21 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from models import Ticket
-from database import get_db
+from database import get_db, Base, engine
 from db_models import TicketDB
 
-app = FastAPI(title="IT Ticket Management System")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(
+    title="IT Ticket Management System",
+    lifespan=lifespan
+)
 
 
 @app.get("/")
